@@ -1,31 +1,40 @@
 # Import python packages
 import streamlit as st
 #from snowflake.snowpark.context import get_active_session
-from snowflake.snowpark.functions import col, when_matched
+from snowflake.snowpark.functions import col
 
 # Write directly to the app
-st.title(":cup_with_straw: Pending Smoothie Orders! :cup_with_straw:")
+st.title(":cup_with_straw: Customoze your Smoothie! :cup_with_straw:")
 st.write(
-  """Orders That Needs To Be Filled.
+  """Choose the fruits you want in your custom soothie!.
   """
 )
 
+name_on_order = st.text_input('Name on Smoothie:')
+st.write('Name on your smoothie with be :', name_on_order)
+
+
 #session = get_active_session()
-cnx = st.connection("snowflake")
+cnx=st.connection("snowflake")
 session = cnx.session()
-#my_dataframe = session.table("smoothies.public.Orders").filter(col('Order_Filled')==0).collect()
-my_dataframe = session.table("smoothies.public.Orders")
-editable_df = st.data_editor(my_dataframe,width="content")
+my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'))
 #st.dataframe(data=my_dataframe, use_container_width=True)
-submitted = st.button('Submit')
-if submitted:
-    try:
-        og_dataset = session.table("smoothies.public.orders")
-        edited_dataset = session.create_dataframe(editable_df)
-        og_dataset.merge(edited_dataset
-                     , (og_dataset['ORDER_UID'] == edited_dataset['ORDER_UID'])
-                     , [when_matched().update({'ORDER_FILLED': edited_dataset['ORDER_FILLED']})]
-                    )
-    except:
-        st.write('Somthing Went Wrong!!!!')
+ingredients_list = st.multiselect("Choose upto 5 ingredients", my_dataframe)
+
+if ingredients_list:
+    ingredients_string = ''
+    for fruit_chosen in ingredients_list:
+        ingredients_string += fruit_chosen + ' '
+
+    st.write(ingredients_string)
+
+    my_insert_stmt = """ insert into smoothies.public.orders(ingredients,name_on_order)
+            values ('""" + ingredients_string + """','""" + name_on_order + """')"""
+
+    #st.write(my_insert_stmt)
+
+    time_to_insert = st.button("Submit")
     
+    if time_to_insert:
+        session.sql(my_insert_stmt).collect()
+        st.success('Your Smoothie is ordered, '+ name_on_order +' !')
