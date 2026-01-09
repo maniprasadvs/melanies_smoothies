@@ -14,7 +14,8 @@ st.write(
 name_on_order = st.text_input('Name on Smoothie:')
 st.write('Name on your smoothie with be :', name_on_order)
 
-
+smoothiefroot_response_all = requests.get("https://my.smoothiefroot.com/api/fruit/all")
+st.text(smoothiefroot_response_all.json())
 #session = get_active_session()
 cnx=st.connection("snowflake")
 session = cnx.session()
