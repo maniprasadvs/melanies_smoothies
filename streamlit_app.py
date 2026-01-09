@@ -14,8 +14,8 @@ st.write(
 name_on_order = st.text_input('Name on Smoothie:')
 st.write('Name on your smoothie with be :', name_on_order)
 
-smoothiefroot_response_all = requests.get("https://my.smoothiefroot.com/api/fruit/all")
-st.text(smoothiefroot_response_all.json())
+#smoothiefroot_response_all = requests.get("https://my.smoothiefroot.com/api/fruit/all")
+#st.text(smoothiefroot_response_all.json())
 #session = get_active_session()
 cnx=st.connection("snowflake")
 session = cnx.session()
@@ -33,7 +33,7 @@ if ingredients_list:
     ingredients_string = ''
     for fruit_chosen in ingredients_list:
         ingredients_string += fruit_chosen + ' '
-        search_on = pd_df.loc[pd_df['Fruit Name] == fruit_chosen, 'SEARCH_ON'].iloc[0]
+        search_on = pd_df.loc[pd_df['Fruit Name'] == fruit_chosen, 'SEARCH_ON'].iloc[0]
         st.subheader(fruit_chosen + ' Nutrition Information!')
         smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/"+search_on)
         #st.text(smoothiefroot_response.json())
